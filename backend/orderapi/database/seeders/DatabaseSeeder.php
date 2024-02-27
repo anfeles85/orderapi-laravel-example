@@ -43,6 +43,10 @@ class DatabaseSeeder extends Seeder
         ]);
         
         //técnico sin especialidad
-        Technician::factory(2)->create();        
+        Technician::factory(2)->create();     
+        
+        $this->call(ActivitySeeder::class);
+        $this->call(OrderSeeder::class);
+        $this->call(OrderActivitySeeder::class);
     }
 }
