@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ActivityController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CausalController;
 use App\Http\Controllers\ObservationController;
 use App\Http\Controllers\OrderController;
@@ -35,9 +36,15 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     });
 });  */
 
+
+Route::post('auth/login', [AuthController::class, 'login'])->name('auth.login');
+Route::get('auth/logout/{user}', [AuthController::class, 'logout'])->name('auth.logout');
+
 Route::apiResource('causal', CausalController::class);
 Route::apiResource('observation', ObservationController::class);
 Route::apiResource('type_activity', TypeActivityController::class);
 Route::apiResource('technician', TechnicianController::class);
 Route::apiResource('activity', ActivityController::class);
 Route::apiResource('order', OrderController::class);
+Route::get('order/add_activity/{order_id}/{activity_id}', [OrderController::class, 'add_activity'])->name('order.add_activity');
+Route::get('order/remove_activity/{order_id}/{activity_id}', [OrderController::class, 'remove_activity'])->name('order.remove_activity');
