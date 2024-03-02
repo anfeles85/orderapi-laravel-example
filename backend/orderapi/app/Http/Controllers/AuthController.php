@@ -6,9 +6,38 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
+    private $rules = [
+        'name' => 'required|string|max:255',
+        'email' => 'required|string|email|max:255|unique:users',
+        'password' => 'required|string|min:8',
+        'password_confirmation' => 'required|same:password'
+    ];
+
+    private $traductionAttributes = array(
+        'name' => 'nombre',
+        'password' => 'contraseña'        
+    );
+
+    public function applyValidator(Request $request)
+    {
+        $validator = Validator::make($request->all(), $this->rules);
+        $validator->setAttributeNames($this->traductionAttributes);
+        $data = [];
+        if ($validator->fails()) {
+            $data = response()->json([                
+                'errors' => $validator->errors(),
+                'data' => $request->all()
+            ],  Response::HTTP_BAD_REQUEST);
+        }
+
+        return $data;
+    }
+
+
     /**
      * Display a listing of the resource.
      */
@@ -82,22 +111,34 @@ class AuthController extends Controller
     /**
      * cerrar sesión y borrar token
      */
-    public function logout(User $user)
+    public function logout(Request $request)
     {       
-        
-        if($user->tokens()->delete())
-        {
-            return response()->json([
-                "message" => "Sesión cerrada exitosamente",
-            ], Response::HTTP_OK);
-        }
-        else
-        {
-            return response([
-                "message" => "Un error ha ocurrido, intente de nuevo"
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }     
+        $user = Auth::user();
+        $user->tokens()->where('id', $user->currentAccessToken()->id)->delete();
+        return response()->json([
+            "message" => "Sesión cerrada exitosamente",
+        ], Response::HTTP_OK);        
     }
+
+    public function register(Request $request)
+    {
+        $data = $this->applyValidator($request);
+
+        if (!empty($data)) {
+            return $data;
+        }
+        
+        $request['password'] =  bcrypt($request['password']);
+        $user = User::create($request->all());
+        
+        $response = [
+            'message' => 'Registro creado exitosamente',
+            'user'  =>  $user
+        ];
+
+        return response()->json($response, Response::HTTP_CREATED);        
+    }
+
 
 
 }

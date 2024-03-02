@@ -38,13 +38,21 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 Route::post('auth/login', [AuthController::class, 'login'])->name('auth.login');
-Route::get('auth/logout/{user}', [AuthController::class, 'logout'])->name('auth.logout');
+Route::post('auth/register', [AuthController::class, 'register'])->name('auth.register');
 
-Route::apiResource('causal', CausalController::class);
-Route::apiResource('observation', ObservationController::class);
-Route::apiResource('type_activity', TypeActivityController::class);
-Route::apiResource('technician', TechnicianController::class);
-Route::apiResource('activity', ActivityController::class);
-Route::apiResource('order', OrderController::class);
-Route::get('order/add_activity/{order_id}/{activity_id}', [OrderController::class, 'add_activity'])->name('order.add_activity');
-Route::get('order/remove_activity/{order_id}/{activity_id}', [OrderController::class, 'remove_activity'])->name('order.remove_activity');
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('auth/logout', [AuthController::class, 'logout'])->name('auth.logout');
+
+    Route::apiResource('causal', CausalController::class);
+    Route::apiResource('observation', ObservationController::class);
+    Route::apiResource('type_activity', TypeActivityController::class);
+    Route::apiResource('technician', TechnicianController::class);
+    Route::apiResource('activity', ActivityController::class);
+    Route::apiResource('order', OrderController::class);
+    Route::get('order/add_activity/{order_id}/{activity_id}', [OrderController::class, 'add_activity'])->name('order.add_activity');
+    Route::get('order/remove_activity/{order_id}/{activity_id}', [OrderController::class, 'remove_activity'])->name('order.remove_activity');
+
+});
+
+
+
